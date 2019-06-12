@@ -11,6 +11,15 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 set( LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib )
 
+## set default release
+if (NOT CMAKE_BUILD_TYPE)
+  message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+    "Choose the type of build -DCMAKE_BUILD_TYPE=xxx, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
+endif()
+
+
 ############### dependencies ######################
 # Eigen
 #include_directories( "/usr/include/eigen3" )
@@ -26,6 +35,8 @@ include_directories( ${Sophus_INCLUDE_DIRS} )
 # Ceres 
 find_package( Ceres REQUIRED )
 include_directories( ${CERES_INCLUDE_DIRS} )
+
+message("ceres directory", ${CERES_INCLUDE_DIRS})
 
 # gflag 
 find_package( gflags REQUIRED )
