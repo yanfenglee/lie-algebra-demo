@@ -38,6 +38,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <sophus/se3.h>
+#include <sophus/so3.h>
 
 
 namespace mytest {
@@ -46,9 +48,20 @@ struct Pose3d {
   Eigen::Vector3d p;
   Eigen::Quaterniond q;
 
+  Sophus::SE3 se3;
+
   // The name of the data type in the g2o file format.
   static std::string name() {
     return "VERTEX_SE3:QUAT";
+  }
+
+  void ToSE3() {
+    se3 = Sophus::SE3(q,p);
+  }
+
+  void FromSE3() {
+    p = se3.translation();
+    q = se3.unit_quaternion();
   }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -60,6 +73,9 @@ inline std::istream& operator>>(std::istream& input, Pose3d& pose) {
   // Normalize the quaternion to account for precision loss due to
   // serialization.
   pose.q.normalize();
+
+  pose.ToSE3();
+
   return input;
 }
 
