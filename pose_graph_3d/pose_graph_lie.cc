@@ -5,31 +5,53 @@
 #include <string>
 
 #include <ceres/ceres.h>
-#include <sophus/so3.h>
-#include <sophus/se3.h>
 
 #include "common/read_g2o.h"
 #include "types.h"
-
-using Sophus::SE3;
-using Sophus::SO3;
+#include "pose_graph_lie_error_term.h"
 
 namespace mytest {
 
 
-typedef Eigen::Matrix<double,6,6> Mat6x6d;
+void BuildOptimizationProblem(const VectorOfConstraints& constraints,
+                              MapOfPoses* poses, ceres::Problem* problem) {
+  assert(poses != NULL);
+  assert(problem != NULL);
+  if (constraints.empty()) {
+    std::cout << "No constraints, no problem to optimize.";
+    return;
+  }
 
-// 给定误差求J_R^{-1}的近似
-Mat6x6d JRInv( SE3 e )
-{
-    Mat6x6d J;
-    J.block(0,0,3,3) = SO3::hat(e.so3().log());
-    J.block(0,3,3,3) = SO3::hat(e.translation());
-    J.block(3,0,3,3) = Eigen::Matrix3d::Zero(3,3);
-    J.block(3,3,3,3) = SO3::hat(e.so3().log());
-    J = J*0.5 + Mat6x6d::Identity();
-    return J;
+  ceres::LossFunction* loss_function = NULL;
+  ceres::LocalParameterization* quaternion_local_parameterization =
+      new ceres::EigenQuaternionParameterization;
+
+  for (VectorOfConstraints::const_iterator constraints_iter =
+           constraints.begin();
+       constraints_iter != constraints.end(); ++constraints_iter) {
+    const Constraint3d& constraint = *constraints_iter;
+
+    MapOfPoses::iterator pose_begin_iter = poses->find(constraint.id_begin);
+    CHECK (pose_begin_iter != poses->end())
+        << "Pose with ID: " << constraint.id_begin << " not found.";
+    MapOfPoses::iterator pose_end_iter = poses->find(constraint.id_end);
+    CHECK (pose_end_iter != poses->end())
+       << "Pose with ID: " << constraint.id_end << " not found.";
+
+    const Eigen::Matrix<double, 6, 6> sqrt_information =
+        constraint.information.llt().matrixL();
+    // Ceres will take ownership of the pointer.
+    ceres::CostFunction* cost_function =
+        new PoseLieCostFunction(constraint.t_be.se3, sqrt_information);
+
+    problem->AddResidualBlock(cost_function, loss_function,
+                              pose_begin_iter->second.se3.data(),
+                              pose_end_iter->second.se3.data());
+
+  }
+
 }
+
 
 // Output the poses to the file with format: id x y z q_x q_y q_z q_w.
 bool OutputPoses(const std::string& filename,  MapOfPoses& poses) {
@@ -53,6 +75,22 @@ bool OutputPoses(const std::string& filename,  MapOfPoses& poses) {
   return true;
 }
 
+
+// Returns true if the solve was successful.
+bool SolveOptimizationProblem(ceres::Problem* problem) {
+  CHECK(problem != NULL);
+
+  ceres::Solver::Options options;
+  options.max_num_iterations = 200;
+  options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
+
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, problem, &summary);
+
+  std::cout << summary.FullReport() << '\n';
+
+  return summary.IsSolutionUsable();
+}
 
 } // namespace mytest
 
@@ -82,8 +120,16 @@ int main(int argc, char** argv) {
   }
 
 
+  ceres::Problem problem;
+  mytest::BuildOptimizationProblem(constraints, &poses, &problem);
+
+  if (!mytest::SolveOptimizationProblem(&problem)) {
+      std::cerr << "The solve was not successful, exiting." << std::endl;
+  }
+
+
   if (!mytest::OutputPoses("poses_optimized.txt", poses))
      std::cerr << "Error outputting to poses_original.txt" << std::endl;
 
   return 0;
-}
+  }

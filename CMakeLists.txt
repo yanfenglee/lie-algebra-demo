@@ -28,15 +28,22 @@ include_directories( ${Eigen3} )
 # OpenCV
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 # Sophus 
 find_package( Sophus REQUIRED )
 include_directories( ${Sophus_INCLUDE_DIRS} )
+
+if (SOPHUS_FOUND)
+  message("sophus directory" === ${Sophus_INCLUDE_DIRS})
+else()
+  message(FATAL "sophus not found!!!")
+endif()
 
 # Ceres 
 find_package( Ceres REQUIRED )
 include_directories( ${CERES_INCLUDE_DIRS} )
 
-message("ceres directory", ${CERES_INCLUDE_DIRS})
+message("ceres directory" ${CERES_INCLUDE_DIRS})
 
 # gflag 
 find_package( gflags REQUIRED )

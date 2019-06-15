@@ -38,17 +38,23 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <sophus/se3.h>
-#include <sophus/so3.h>
+#include <sophus/se3.hpp>
+#include <sophus/so3.hpp>
 
 
 namespace mytest {
+
+using Sophus::SE3d;
+using Sophus::SO3d;
+using Sophus::Vector6d;
+
+typedef Eigen::Matrix<double,6,6> Mat6x6d;
 
 struct Pose3d {
   Eigen::Vector3d p;
   Eigen::Quaterniond q;
 
-  Sophus::SE3 se3;
+  SE3d se3;
 
   // The name of the data type in the g2o file format.
   static std::string name() {
@@ -56,7 +62,7 @@ struct Pose3d {
   }
 
   void ToSE3() {
-    se3 = Sophus::SE3(q,p);
+    se3 = SE3d(q,p);
   }
 
   void FromSE3() {
