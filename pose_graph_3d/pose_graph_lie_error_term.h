@@ -23,7 +23,7 @@ Mat6x6d JRInv( SE3d e )
     return J;
 }
 
-class PoseLieCostFunction : public ceres::SizedCostFunction<6, 1> {
+class PoseLieCostFunction : public ceres::SizedCostFunction<6, 6, 6> {
  public:
   PoseLieCostFunction(const SE3d& t_ab_measured, const Eigen::Matrix<double, 6, 6>& sqrt_information)
       : t_ab_measured_(t_ab_measured), sqrt_information_(sqrt_information) {}
@@ -45,8 +45,11 @@ class PoseLieCostFunction : public ceres::SizedCostFunction<6, 1> {
 
         Mat6x6d J = JRInv(SE3d::exp(err));
 
-        //memcpy(jacobians[0], (-J * t_b.inverse().Adj()).data(), 36*sizeof(double));
-        //memcpy(jacobians[1], (J * t_b.inverse().Adj()).data(), 36*sizeof(double));
+        Mat6x6d j1 = -J * t_b.inverse().Adj();
+        Mat6x6d j2 = -j1;
+        
+        memcpy(jacobians[0], j1.data(), 36*sizeof(double));
+        memcpy(jacobians[1], j2.data(), 36*sizeof(double));
     }
 
     return true;
