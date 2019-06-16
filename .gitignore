@@ -1,0 +1,8 @@
+.*
+!.gitignore
+build
+bin
+poses_optimized.txt
+poses_original.txt
+cmake-build-debug
+cmake-build-release
