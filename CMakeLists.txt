@@ -21,13 +21,15 @@ endif()
 
 
 ############### dependencies ######################
+
+# OpenCV
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 # Eigen
 #include_directories( "/usr/include/eigen3" )
 find_package( Eigen3 REQUIRED )
 include_directories( ${Eigen3} )
-# OpenCV
-find_package( OpenCV REQUIRED )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Sophus 
 find_package( Sophus REQUIRED )
@@ -45,15 +47,11 @@ include_directories( ${CERES_INCLUDE_DIRS} )
 
 message("ceres directory" ${CERES_INCLUDE_DIRS})
 
-# gflag 
-find_package( gflags REQUIRED )
-include_directories( ${gflags_INCLUDE_DIRS} )
 
-# set( THIRD_PARTY_LIBS 
-#     ${OpenCV_LIBS}
-#     ${Sophus_LIBRARIES}
-#     ${Ceres_LIBS}
-# )
+set( THIRD_PARTY_LIBS
+        ${CERES_LIBRARIES}
+        ${SOPHUS_LIBRARIES}
+)
 ############### dependencies ######################
 include_directories(./)
 add_subdirectory( pose_graph_3d )
