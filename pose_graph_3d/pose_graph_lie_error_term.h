@@ -23,7 +23,7 @@ Mat6x6d JRInv( SE3d e )
     return J;
 }
 
-class PoseLieCostFunction : public ceres::SizedCostFunction<6, 7, 7> {
+class PoseLieCostFunction : public ceres::SizedCostFunction<6, 6, 6> {
  public:
   PoseLieCostFunction(const SE3d& t_ab_measured, const Eigen::Matrix<double, 6, 6>& sqrt_information)
       : t_ab_measured_(t_ab_measured), sqrt_information_(sqrt_information) {}
