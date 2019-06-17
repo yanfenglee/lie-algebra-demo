@@ -23,36 +23,24 @@ Mat6x6d JRInv( SE3d e )
     return J;
 }
 
-class PoseLieCostFunction : public ceres::SizedCostFunction<6, 6, 6> {
+class PoseLieCostFunction {
  public:
   PoseLieCostFunction(const SE3d& t_ab_measured, const Eigen::Matrix<double, 6, 6>& sqrt_information)
       : t_ab_measured_(t_ab_measured), sqrt_information_(sqrt_information) {}
 
-  virtual bool Evaluate(double const* const* parameters,
-                        double* residuals,
-                        double** jacobians) const {
 
+    template <typename T>
+    bool operator()(const T* const a_ptr, const T* const b_ptr,
+                    T* residuals_ptr) const {
 
-    Eigen::Map<SE3d const> const t_a(parameters[0]);
-    Eigen::Map<SE3d const> const t_b(parameters[1]);
+        Eigen::Map<Sophus::SE3<T> const> const t_a(a_ptr);
+        Eigen::Map<Sophus::SE3<T> const> const t_b(b_ptr);
 
-    Vector6d err = (t_ab_measured_.inverse() * t_a.inverse() * t_b).log();
-    for (int i = 0; i < 6; ++i) {
-        residuals[i] = err(i);
-    }
+        Eigen::Map<Eigen::Matrix<T, 6, 1> > residuals(residuals_ptr);
 
-    if (jacobians != NULL && jacobians[0] != NULL) {
+        residuals = (t_ab_measured_.cast<T>().inverse() * t_a.inverse() * t_b).log();
 
-        Mat6x6d J = JRInv(SE3d::exp(err));
-
-        Mat6x6d j1 = -J * t_b.inverse().Adj();
-        Mat6x6d j2 = -j1;
-        
-        memcpy(jacobians[0], j1.data(), 36*sizeof(double));
-        memcpy(jacobians[1], j2.data(), 36*sizeof(double));
-    }
-
-    return true;
+      return true;
   }
 
  private:
