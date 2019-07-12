@@ -1,5 +1,10 @@
 Pose Graph 3D
 ----------------
+### ceres example, added lie algebra for optimize using sophus library
+
+
+#### below are ceres example description
+### ------------------------------------------------------
 
 The Simultaneous Localization and Mapping (SLAM) problem consists of building a
 map of an unknown environment while simultaneously localizing against this
