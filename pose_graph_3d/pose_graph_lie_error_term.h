@@ -12,16 +12,16 @@ namespace mytest {
 
 
 // 给定误差求Jr^{-1}的近似
-Mat6x6d JRInv( SE3d e )
-{
-    Mat6x6d J;
-    J.block(0,0,3,3) = SO3d::hat(e.so3().log());
-    J.block(0,3,3,3) = SO3d::hat(e.translation());
-    J.block(3,0,3,3) = Eigen::Matrix3d::Zero(3,3);
-    J.block(3,3,3,3) = SO3d::hat(e.so3().log());
-    J = J*0.5 + Mat6x6d::Identity();
-    return J;
-}
+//Mat6x6d JRInv( SE3d e )
+//{
+//    Mat6x6d J;
+//    J.block(0,0,3,3) = SO3d::hat(e.so3().log());
+//    J.block(0,3,3,3) = SO3d::hat(e.translation());
+//    J.block(3,0,3,3) = Eigen::Matrix3d::Zero(3,3);
+//    J.block(3,3,3,3) = SO3d::hat(e.so3().log());
+//    J = J*0.5 + Mat6x6d::Identity();
+//    return J;
+//}
 
 class PoseLieCostFunction {
  public:

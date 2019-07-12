@@ -58,6 +58,10 @@ namespace mytest {
 
         }
 
+        MapOfPoses::iterator pose_start_iter = poses->begin();
+        CHECK (pose_start_iter != poses->end()) << "There are no poses.";
+        problem->SetParameterBlockConstant(pose_start_iter->second.se3.data());
+
     }
 
 
