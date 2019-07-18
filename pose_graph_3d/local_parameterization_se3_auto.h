@@ -14,7 +14,7 @@ namespace mytest {
             Eigen::Map<SE3<T> const> const raw(T_raw);
             Eigen::Map<Eigen::Matrix<T,6,1> const> const delta(delta_raw);
             Eigen::Map<SE3<T>> T_plus_delta(x_plus_delta);
-            T_plus_delta = SE3<T>::exp(delta) * raw;
+            T_plus_delta = raw * SE3<T>::exp(delta);
             return true;
         }
     };
