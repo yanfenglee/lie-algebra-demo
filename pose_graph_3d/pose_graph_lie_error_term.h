@@ -82,19 +82,19 @@ public:
 
         if (jacobians != NULL)
         {
-            Mat6x6d jinv = JRInv(r);
+            //Mat6x6d jinv = JRInv(r);
 
             if (jacobians[0] != NULL)
             {
                 Eigen::Map<Eigen::Matrix<double, 6, 7, Eigen::RowMajor>> J1(jacobians[0]);
                 J1.setZero();
-                J1.block<6, 6>(0, 0) = -jinv * t_b.inverse().Adj();
+                J1.block<6, 6>(0, 0) = -t_b.inverse().Adj();
             }
             if (jacobians[1] != NULL)
             {
                 Eigen::Map<Eigen::Matrix<double, 6, 7, Eigen::RowMajor>> J1(jacobians[1]);
                 J1.setZero();
-                J1.block<6, 6>(0, 0) = jinv * t_b.inverse().Adj();
+                J1.block<6, 6>(0, 0) = t_b.inverse().Adj();
             }
         }
 
