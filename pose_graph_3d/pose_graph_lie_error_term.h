@@ -18,6 +18,8 @@ using namespace Sophus;
 class PoseLieCostFunction
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     PoseLieCostFunction(const SE3d &t_ab_measured, const Eigen::Matrix<double, 6, 6> &sqrt_information)
         : t_ab_measured_(t_ab_measured), sqrt_information_(sqrt_information) {}
 
@@ -57,9 +59,11 @@ Mat6x6d JRInv(SE3d e)
     return J;
 }
 
-class PoseLieAnalyticCostFunction : public ceres::SizedCostFunction<2, 7, 7>
+class PoseLieAnalyticCostFunction : public ceres::SizedCostFunction<6, 7, 7>
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     PoseLieAnalyticCostFunction(const SE3d &t_ab_measured)
         : t_ab_measured_(t_ab_measured) {}
 
@@ -73,25 +77,24 @@ public:
 
         Eigen::Map<Eigen::Matrix<double, 6, 1>> err(residuals);
 
-        err = (t_ab_measured_.inverse() * t_a.inverse() * t_b).log();
+        auto r = t_ab_measured_.inverse() * t_a.inverse() * t_b;
+        err = r.log();
 
         if (jacobians != NULL)
         {
-            Mat6x6d jinv = JRInv(SE3d::exp(err));
+            Mat6x6d jinv = JRInv(r);
 
             if (jacobians[0] != NULL)
             {
                 Eigen::Map<Eigen::Matrix<double, 6, 7, Eigen::RowMajor>> J1(jacobians[0]);
                 J1.setZero();
                 J1.block<6, 6>(0, 0) = -jinv * t_b.inverse().Adj();
-                J1.setIdentity();
             }
             if (jacobians[1] != NULL)
             {
                 Eigen::Map<Eigen::Matrix<double, 6, 7, Eigen::RowMajor>> J1(jacobians[1]);
                 J1.setZero();
                 J1.block<6, 6>(0, 0) = jinv * t_b.inverse().Adj();
-                J1.setIdentity();
             }
         }
 

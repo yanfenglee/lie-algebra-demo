@@ -39,7 +39,7 @@ namespace mytest {
             MapOfPoses::iterator pose_end_iter = poses->find(constraint.id_end);
             CHECK (pose_end_iter != poses->end()) << "Pose with ID: " << constraint.id_end << " not found.";
 
-            const Eigen::Matrix<double, 6, 6> sqrt_information = constraint.information.llt().matrixL();
+            //const Eigen::Matrix<double, 6, 6> sqrt_information = constraint.information.llt().matrixL();
 
             problem->AddParameterBlock(pose_begin_iter->second.se3.data(), 7, localparam);
 

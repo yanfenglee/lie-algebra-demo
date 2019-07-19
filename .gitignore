@@ -1,6 +1,8 @@
 .*
 !.gitignore
 build
+debug
+release
 bin
 poses_optimized.txt
 poses_original.txt
