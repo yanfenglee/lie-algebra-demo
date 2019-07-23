@@ -98,6 +98,13 @@ namespace mytest {
         ceres::Solve(options, problem, &summary);
 
         std::cout << summary.FullReport() << '\n';
+        std::cout << "=============================================" << '\n';
+//
+
+
+//        ceres::Solve(options, problem, &summary);
+//
+//        std::cout << summary.FullReport() << '\n';
 
         return summary.IsSolutionUsable();
     }

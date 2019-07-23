@@ -33,7 +33,7 @@ public:
 
         Eigen::Map<Eigen::Matrix<T, 6, 1>> residuals(residuals_ptr);
 
-        residuals = (t_ab_measured_.cast<T>().inverse() * t_a.inverse() * t_b).log();
+        residuals = (t_ab_measured_.template cast<T>().inverse() * t_a.inverse() * t_b).log();
 
         return true;
     }
